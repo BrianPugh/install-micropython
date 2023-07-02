@@ -17,7 +17,7 @@ Simply add the following step to your workflow:
 ```yaml
 steps:
   - name: Install MicroPython
-    uses: actions/install-micropython@v1
+    uses: BrianPugh/install-micropython@v1
 ```
 
 ## Configuration
@@ -26,7 +26,7 @@ For example:
 
 ```yaml
 steps:
-  - uses: actions/install-micropython@v1
+  - uses: BrianPugh/install-micropython@v1
     with:
       reference: v1.20.0
 ```
