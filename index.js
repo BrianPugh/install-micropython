@@ -17,12 +17,12 @@ async function run() {
 
   let ref = reference;
 
-  if (!ref) {
-    const logResult = await exec.getExecOutput('git', ['rev-parse', 'HEAD'], {cwd: 'micropython'});
-    ref = logResult.stdout.trim();
-  } else {
+  if(ref){
     await exec.exec(`git checkout ${ref}`, [], {cwd: 'micropython'});
   }
+
+  const logResult = await exec.getExecOutput('git', ['rev-parse', 'HEAD'], {cwd: 'micropython'});
+  ref = logResult.stdout.trim();
 
   const cacheKey = `micropython-unix-port-${repository}-${ref}`;
 

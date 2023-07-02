@@ -1,21 +1,17 @@
 name: "Install MicroPython"
 description: "Build and install MicroPython"
 author: "Brian Pugh <bnp117@gmail.com>"
-
 branding:
   icon: "package"
   color: "green"
-
 inputs:
   repository:
     description: "Micropython Git Repository"
     required: false
     default: "https://github.com/micropython/micropython"
-
   reference:
     description: "Specific branch, tag, or commit SHA to checkout"
     required: false
-
 runs:
   using: "node16"
   main: "index.js"
