@@ -26,7 +26,12 @@ async function run() {
 
   const cacheKey = `micropython-unix-port-${repository}-${ref}`;
 
-  const cacheHit = await cache.restoreCache(['/usr/local/bin/micropython'], cacheKey);
+  const cachePaths = [
+    '/usr/local/bin/micropython',
+    '/usr/local/bin/mpy-cross',
+    mpy_path
+  ]
+  const cacheHit = await cache.restoreCache(cachePaths, cacheKey);
 
   if (cacheHit) {
     return;
@@ -44,7 +49,7 @@ async function run() {
   await io.cp('micropython/ports/unix/build-standard/micropython', '/usr/local/bin/micropython');
 
   // Save the cache
-  await cache.saveCache(['/usr/local/bin/micropython', '/usr/local/bin/mpy-cross', mpy_path], cacheKey);
+  await cache.saveCache(cachePaths, cacheKey);
 }
 
 run().catch(error => core.setFailed(error.message));
