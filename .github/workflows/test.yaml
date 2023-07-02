@@ -32,3 +32,14 @@ jobs:
 
       - name: Verify Micropython Installation
         run: micropython tools/print_version.py
+
+      - name: Verify MPY_DIR
+        run: |
+          echo "MPY_DIR is set to $MPY_DIR"
+
+          if [ -d "$MPY_DIR" ]; then
+            echo "The directory $MPY_DIR exists."
+          else
+            echo "The directory $MPY_DIR does not exist."
+            exit 1
+          fi
