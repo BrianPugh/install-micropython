@@ -28,15 +28,10 @@ async function run() {
     '/usr/local/bin/mpy-cross',
     mpy_dir
   ]
-  core.info(`Checking cacheKey ${cacheKey}`);
-  core.info(`cachePaths: ${cachePaths}`);
   const cacheHit = await cache.restoreCache(cachePaths.slice(), cacheKey);
 
   if (cacheHit) {
-    core.info('Cache hit');
     return;
-  } else {
-    core.info('Cache miss');
   }
 
   // Build mpy-cross
@@ -51,8 +46,6 @@ async function run() {
   await io.cp(`${mpy_dir}/ports/unix/build-standard/micropython`, '/usr/local/bin/micropython');
 
   // Save the cache
-  core.info(`Saving cache to cacheKey ${cacheKey}`);
-  core.info(`cachePaths: ${cachePaths}`);
   await cache.saveCache(cachePaths.slice(), cacheKey);
 }
 
