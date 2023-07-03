@@ -21,17 +21,21 @@ async function run() {
   const logResult = await exec.getExecOutput('git', ['rev-parse', 'HEAD'], {cwd: mpy_dir});
   reference = logResult.stdout.trim();
 
-  const cacheKey = `micropython-unix-port-${repository}-${reference}`;
+  const cacheKey = `install-micropython-${reference}`;
 
   const cachePaths = [
     '/usr/local/bin/micropython',
     '/usr/local/bin/mpy-cross',
     mpy_dir
   ]
+  core.info(`Checking cacheKey ${cacheKey}`);
   const cacheHit = await cache.restoreCache(cachePaths, cacheKey);
 
   if (cacheHit) {
+    core.info('Cache hit');
     return;
+  } else {
+    core.info('Cache miss');
   }
 
   // Build mpy-cross
@@ -46,6 +50,7 @@ async function run() {
   await io.cp(`${mpy_dir}/ports/unix/build-standard/micropython`, '/usr/local/bin/micropython');
 
   // Save the cache
+  core.info(`Saving cache to cacheKey ${cacheKey}`);
   await cache.saveCache(cachePaths, cacheKey);
 }
 
