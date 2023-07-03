@@ -23,3 +23,5 @@ Temporary Items
 
 # Node
 node_modules/
+.github/actions/test/dist/
+.github/actions/test/node_modules/

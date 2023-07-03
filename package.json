@@ -2,9 +2,10 @@
   "name": "build-and-install-micropython-unix-port",
   "version": "1.0.0",
   "description": "A GitHub Action to clone, build, and install the Unix port of MicroPython",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "ncc build index.js -o dist"
   },
   "repository": {
     "type": "git",
@@ -29,5 +30,8 @@
     "@actions/core": "^1.10.0",
     "@actions/exec": "^1.1.1",
     "@actions/io": "^1.1.3"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.36.1"
   }
 }
