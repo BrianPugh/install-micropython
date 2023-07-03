@@ -29,6 +29,7 @@ async function run() {
     mpy_dir
   ]
   core.info(`Checking cacheKey ${cacheKey}`);
+  core.info(`cachePaths: ${cachePaths}`);
   const cacheHit = await cache.restoreCache(cachePaths.slice(), cacheKey);
 
   if (cacheHit) {
@@ -51,6 +52,7 @@ async function run() {
 
   // Save the cache
   core.info(`Saving cache to cacheKey ${cacheKey}`);
+  core.info(`cachePaths: ${cachePaths}`);
   await cache.saveCache(cachePaths.slice(), cacheKey);
 }
 
