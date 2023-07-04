@@ -58773,7 +58773,6 @@ async function run() {
   const cachePaths = [
     '/usr/local/bin/micropython',
     '/usr/local/bin/mpy-cross',
-    mpy_dir
   ]
   const cacheHit = await cache.restoreCache(cachePaths.slice(), cacheKey);
 
