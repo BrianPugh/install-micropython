@@ -26,7 +26,7 @@
   },
   "homepage": "https://github.com/BrianPugh/install-micropython",
   "dependencies": {
-    "@actions/cache": "^3.2.1",
+    "@actions/cache": "^3.2.2",
     "@actions/core": "^1.10.0",
     "@actions/exec": "^1.1.1",
     "@actions/io": "^1.1.3"
