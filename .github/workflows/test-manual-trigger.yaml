@@ -1,0 +1,55 @@
+test-manual-trigger.yaml
+
+
+name: Test Manual Trigger
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to test'
+        required: true
+        default: 'fix/reference-param-issue'
+      reference:
+        description: 'MicroPython reference to checkout'
+        required: false  # Not mandatory to provide this input
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Added with reference
+      - name: Build and Install MicroPython Unix Port
+        uses: ./
+        with:
+          reference: ${{ github.event.inputs.reference }}
+
+      - name: Verify mpy-cross Installation
+        run: mpy-cross --version
+
+      - name: Verify Micropython Installation
+        run: micropython tools/print_version.py
+
+      - name: Verify MPY_DIR
+        run: |
+          echo "MPY_DIR is set to $MPY_DIR"
+
+          if [ -d "$MPY_DIR" ]; then
+            echo "The directory $MPY_DIR exists."
+          else
+            echo "The directory $MPY_DIR does not exist."
+            exit 1
+          fi
