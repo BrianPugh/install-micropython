@@ -1,4 +1,4 @@
-name: Test Manual Trigger
+name: Test on Push Trigger
 
 on:
   push:
@@ -21,8 +21,8 @@ jobs:
       # Added with reference
       - name: Build and Install MicroPython Unix Port
         uses: ./
-        with:
-          reference: 'v1.20.0'
+        # with:
+        #  reference: 'v1.20.0'
 
       - name: Verify mpy-cross Installation
         run: mpy-cross --version
