@@ -1,15 +1,7 @@
 name: Test Manual Trigger
 
 on:
-  workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Branch to test'
-        required: true
-        default: 'fix/reference-param-issue'
-      reference:
-        description: 'MicroPython reference to checkout'
-        required: false  # Not mandatory to provide this input
+  push:
 
 jobs:
   test:
@@ -17,8 +9,6 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.inputs.branch }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -32,7 +22,7 @@ jobs:
       - name: Build and Install MicroPython Unix Port
         uses: ./
         with:
-          reference: ${{ github.event.inputs.reference }}
+          reference: 'v1.20.0'
 
       - name: Verify mpy-cross Installation
         run: mpy-cross --version
