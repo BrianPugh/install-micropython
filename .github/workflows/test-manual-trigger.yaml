@@ -1,6 +1,3 @@
-test-manual-trigger.yaml
-
-
 name: Test Manual Trigger
 
 on:
