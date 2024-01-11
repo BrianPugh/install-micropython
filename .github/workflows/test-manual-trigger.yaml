@@ -29,9 +29,9 @@ jobs:
         run: npm ci
 
       - name: Build and Install MicroPython Unix Port
-          uses: ./
-          with:
-            reference: ${{ github.event.inputs.reference }}
+        uses: ./
+        with:
+          reference: ${{ github.event.inputs.reference }}
 
       - name: Verify mpy-cross Installation
         run: mpy-cross --version
