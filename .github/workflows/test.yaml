@@ -2,8 +2,7 @@ name: Test
 
 on:
   push:
-    branches:
-      - main
+
   pull_request:
     branches:
       - main
@@ -11,6 +10,10 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        mpy-reference: ["v1.22.1", ""]
 
     steps:
       - name: Check out code
@@ -26,6 +29,8 @@ jobs:
 
       - name: Build and Install MicroPython Unix Port
         uses: ./
+        with:
+          reference: ${{ matrix.mpy-reference }}
 
       - name: Verify mpy-cross Installation
         run: mpy-cross --version
