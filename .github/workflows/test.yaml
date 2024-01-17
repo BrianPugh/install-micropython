@@ -30,7 +30,7 @@ jobs:
       - name: Build and Install MicroPython Unix Port
         uses: ./
         with:
-          reference: ${{mpy-reference}}
+          reference: ${{ matrix.mpy-reference }}
 
       - name: Verify mpy-cross Installation
         run: mpy-cross --version
