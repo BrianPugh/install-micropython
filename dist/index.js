@@ -58959,9 +58959,10 @@ async function run() {
   const logResult = await exec.getExecOutput('git', ['rev-parse', 'HEAD'], {cwd: mpy_dir});
   reference = logResult.stdout.trim();
 
-  const cacheKey = `install-micropython-${reference}`;
+  const cacheKey = `install-micropython-2-${reference}`;
 
   const cachePaths = [
+    `${mpy_dir}/mpy-cross/build/mpy-cross`,
     '/usr/local/bin/micropython',
     '/usr/local/bin/mpy-cross',
   ]
