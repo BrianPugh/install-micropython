@@ -13,5 +13,5 @@ inputs:
     description: "Specific branch, tag, or commit SHA to checkout"
     required: false
 runs:
-  using: "node16"
+  using: "node20"
   main: "dist/index.js"
