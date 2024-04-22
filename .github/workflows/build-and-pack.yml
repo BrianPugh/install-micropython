@@ -11,10 +11,10 @@ jobs:
       PACKED_JS_PATH: "dist/index.js"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
@@ -26,7 +26,8 @@ jobs:
 
       - name: Check packed js changes
         id: packedJsStatus
-        run: echo ::set-output name=changes::$(git status ${{ env.PACKED_JS_PATH }} --porcelain)
+        run: |
+          echo "changes=$(git status ${{ env.PACKED_JS_PATH }} --porcelain)" >> $GITHUB_OUTPUT
 
       - name: Commit packed js
         id: commitPackedJs
