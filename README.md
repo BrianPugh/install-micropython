@@ -4,7 +4,7 @@
 
 This action provides the following functionality for GitHub Actions users:
 
-* Builds an installs the following executables:
+* Builds and installs the following executables:
     * `micropython` - The micropython runtime. Can be used to run unit tests in conjunction with libraries such as micropython's [`unittest`](https://github.com/micropython/micropython-lib/tree/master/python-stdlib/unittest).
     * `mpy-cross` - The micropython cross-compiler. Used to cross-compile precompiled bytecode for specific microcontroller architectures.
 * Provides a clone of the micropython repository and sets the environment variable `MPY_DIR` to it's path.
