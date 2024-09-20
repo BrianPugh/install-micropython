@@ -48,3 +48,12 @@ A git reference (tag, commit, or branch) of the micropython repository to use.
 with:
   reference: v1.20.0
 ```
+
+#### cflags
+When compiling micropython binaries, this value gets passed along to environment variable `CFLAGS_EXTRA`.
+This can be used to enable/disable certain micropython features.
+
+```yaml
+with:
+  cflags: '-DMICROPY_PY_RE_MATCH_GROUPS=1'
+```

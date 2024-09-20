@@ -7,9 +7,11 @@ async function run() {
   // Get the repository URL and reference
   const repository = core.getInput('repository');
   let reference = core.getInput('reference');
+  const cflags = core.getInput('cflags');
 
   const mpy_dir = '/home/runner/micropython'
   core.exportVariable('MPY_DIR', mpy_dir);
+  core.exportVariable('CFLAGS_EXTRA', cflags);
 
   // Shallow clone the repository to get the latest commit hash or checkout the provided reference
   if (reference) {
@@ -24,7 +26,7 @@ async function run() {
   const logResult = await exec.getExecOutput('git', ['rev-parse', 'HEAD'], {cwd: mpy_dir});
   reference = logResult.stdout.trim();
 
-  const cacheKey = `install-micropython-2-${reference}`;
+  const cacheKey = `install-micropython-2-${repository}-${reference}-${cflags}`;
 
   const cachePaths = [
     `${mpy_dir}/mpy-cross/build/mpy-cross`,
