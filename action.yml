@@ -12,6 +12,9 @@ inputs:
   reference:
     description: "Specific branch, tag, or commit SHA to checkout"
     required: false
+  cflags:
+    description: "Extra cflags to pass to micropython at compile-time."
+    required: false
 runs:
   using: "node20"
   main: "dist/index.js"
