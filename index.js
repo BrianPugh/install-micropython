@@ -1,7 +1,7 @@
-const cache = require('@actions/cache');
-const core = require('@actions/core');
-const exec = require('@actions/exec');
-const io = require('@actions/io');
+import * as cache from '@actions/cache';
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
+import * as io from '@actions/io';
 
 async function run() {
   // Get the repository URL and reference
