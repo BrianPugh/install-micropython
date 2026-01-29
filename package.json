@@ -1,6 +1,7 @@
 {
   "name": "build-and-install-micropython-unix-port",
   "version": "1.0.0",
+  "type": "module",
   "description": "A GitHub Action to clone, build, and install the Unix port of MicroPython",
   "main": "dist/index.js",
   "scripts": {
@@ -27,9 +28,9 @@
   "homepage": "https://github.com/BrianPugh/install-micropython",
   "dependencies": {
     "@actions/cache": "^5.0.5",
-    "@actions/core": "^2.0.3",
-    "@actions/exec": "^2.0.0",
-    "@actions/io": "^2.0.0"
+    "@actions/core": "^3.0.0",
+    "@actions/exec": "^3.0.0",
+    "@actions/io": "^3.0.2"
   },
   "devDependencies": {
     "@vercel/ncc": "^0.38.4"
