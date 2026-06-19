@@ -25,8 +25,9 @@ npm test         # Placeholder (no tests implemented)
 **Key implementation details:**
 - Binaries installed to `/usr/local/bin/` (micropython, mpy-cross)
 - Repository cloned to `/home/runner/micropython`
-- Cache key format: `install-micropython-2-${repository}-${reference}-${cflags}`
-- Uses shallow clone for tags/branches, full clone for commit hashes (detected via regex)
+- Cache key format: `install-micropython-2-${repository}-${reference}-${cflags}` (the `-2-` is a manual cache version bump; increment it to invalidate all caches)
+- Clone strategy: if a `reference` input is given, full clone then `git checkout <reference>`; if not, `git clone --depth 1` (shallow) of the default branch. The resolved `HEAD` SHA (via `git rev-parse`) is what goes into the cache key, not the raw reference input
+- On cache hit, the action returns early — no build, binaries restored from `/usr/local/bin/`. Builds use `make -j$(nproc)`
 
 **Dependencies:** `@actions/cache`, `@actions/core`, `@actions/exec`, `@actions/io`
 
