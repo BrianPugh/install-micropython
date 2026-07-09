@@ -54,8 +54,9 @@ with:
 ```
 
 #### cflags
-When compiling micropython binaries, this value gets passed along to environment variable `CFLAGS_EXTRA`.
+When compiling the `micropython` Unix port binary, this value gets passed along to environment variable `CFLAGS_EXTRA`.
 This can be used to enable/disable certain micropython features.
+It is intentionally not applied to the `mpy-cross` build, whose fixed feature configuration is incompatible with many otherwise-valid feature flags.
 Note that `CFLAGS_EXTRA` remains exported for all subsequent steps of the job.
 
 ```yaml

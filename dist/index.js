@@ -89207,8 +89207,12 @@ async function run() {
 
   const jobs = external_os_.cpus().length;
 
-  // Build mpy-cross
-  await exec_exec('make', [`-j${jobs}`], { cwd: `${mpy_dir}/mpy-cross` });
+  // Build mpy-cross. It has a fixed feature configuration, so user cflags are
+  // withheld here and only applied to the Unix port build below
+  await exec_exec('make', [`-j${jobs}`], {
+    cwd: `${mpy_dir}/mpy-cross`,
+    env: { ...process.env, CFLAGS_EXTRA: '' },
+  });
 
   // Build Unix Port
   await exec_exec('make', [`-j${jobs}`], { cwd: `${mpy_dir}/ports/unix` });

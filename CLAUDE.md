@@ -30,6 +30,7 @@ npm test         # Run eslint (also available as npm run lint)
 - Clone strategy: if a `reference` input is given, `git ls-remote --tags` probes whether it's a tag — tags get `git clone --depth 1 --branch <reference>` (fast; tag ref present so `git describe` version strings stay exact), branches/SHAs get a full clone + checkout (so `git describe` has tag history). No reference → shallow clone of the default branch
 - `make submodules` (ports/unix) always runs when building from source (required), and also runs on cache hits unless the `submodules` input is false — this keeps `MPY_DIR` usable for natmod builds on warm runs. On cache hit the action then returns early — no build, binaries restored to `/usr/local/bin/`. Builds use `make -jN` with N from `os.cpus().length`
 - `cache.saveCache` failures are downgraded to warnings (a concurrent job may have already reserved the key)
+- `CFLAGS_EXTRA` (from the `cflags` input) is applied only to the Unix port build, not mpy-cross — mpy-cross's fixed config (e.g. `MICROPY_PY_SYS (0)`) fails to compile with many otherwise-valid feature flags
 
 **Dependencies:** `@actions/cache`, `@actions/core`, `@actions/exec`, `@actions/io`
 
