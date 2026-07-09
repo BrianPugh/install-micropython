@@ -2,10 +2,15 @@ name: Test
 
 on:
   push:
+    branches:
+      - main
 
   pull_request:
     branches:
       - main
+
+permissions:
+  contents: read
 
 jobs:
   test:
@@ -13,21 +18,26 @@ jobs:
 
     strategy:
       matrix:
-        mpy-reference: ["v1.22.1", ""]
+        # A tag (shallow clone), a branch (full clone), and the default branch
+        mpy-reference: ["v1.22.1", "master", ""]
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Install dependencies
         run: npm ci
 
+      - name: Lint
+        run: npm test
+
       - name: Build and Install MicroPython Unix Port
+        id: install
         uses: ./
         with:
           reference: ${{ matrix.mpy-reference }}
@@ -37,6 +47,15 @@ jobs:
 
       - name: Verify Micropython Installation
         run: micropython tools/print_version.py
+
+      - name: Verify sha output
+        run: |
+          echo "Resolved SHA: ${{ steps.install.outputs.sha }}"
+
+          if [ -z "${{ steps.install.outputs.sha }}" ]; then
+            echo "The sha output is empty."
+            exit 1
+          fi
 
       - name: Verify MPY_DIR
         run: |
@@ -48,3 +67,71 @@ jobs:
             echo "The directory $MPY_DIR does not exist."
             exit 1
           fi
+
+  test-cache:
+    # Re-run with the same pinned reference as the test job to exercise the
+    # cache-restore path, with and without submodule initialization.
+    needs: test
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        submodules: ["true", "false"]
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v5
+
+      - name: Build and Install MicroPython Unix Port
+        id: install
+        uses: ./
+        with:
+          reference: "v1.22.1"
+          submodules: ${{ matrix.submodules }}
+
+      - name: Verify cache was used
+        run: |
+          if [ "${{ steps.install.outputs.cache-hit }}" != "true" ]; then
+            echo "Expected a cache hit, got '${{ steps.install.outputs.cache-hit }}'."
+            exit 1
+          fi
+
+      - name: Verify submodules handling
+        run: |
+          cd "$MPY_DIR"
+          initialized=$(git submodule status | grep -c '^[^-]' || true)
+          echo "Initialized submodules: $initialized"
+
+          if [ "${{ matrix.submodules }}" = "true" ] && [ "$initialized" -eq 0 ]; then
+            echo "Expected submodules to be initialized."
+            exit 1
+          fi
+          if [ "${{ matrix.submodules }}" = "false" ] && [ "$initialized" -ne 0 ]; then
+            echo "Expected submodule initialization to be skipped."
+            exit 1
+          fi
+
+      - name: Verify mpy-cross Installation
+        run: mpy-cross --version
+
+      - name: Verify Micropython Installation
+        run: micropython tools/print_version.py
+
+  test-cflags:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v5
+
+      - name: Build and Install MicroPython Unix Port
+        uses: ./
+        with:
+          reference: "v1.22.1"
+          # #ifndef-guarded everywhere and off by default on the unix standard
+          # variant, so it can't collide with port config and is observable
+          cflags: "-DMICROPY_PY_SYS_TRACEBACKLIMIT=1"
+
+      - name: Verify cflags were applied
+        # sys.tracebacklimit is only settable when built with MICROPY_PY_SYS_TRACEBACKLIMIT
+        run: micropython -c "import sys; sys.tracebacklimit = 1; print('cflags applied')"

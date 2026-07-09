@@ -11,31 +11,34 @@ This is a GitHub Action that builds and installs the MicroPython Unix port for C
 ```bash
 npm ci           # Install dependencies
 npm run build    # Bundle index.js with dependencies to dist/index.js using @vercel/ncc
-npm test         # Placeholder (no tests implemented)
+npm test         # Run eslint (also available as npm run lint)
 ```
 
 ## Architecture
 
 **Single-file action** with straightforward execution flow:
 
-1. `index.js` (58 lines) - Core logic: clone repo → check cache → build if needed → install binaries → export env vars
-2. `action.yml` - Action metadata defining inputs (repository, reference, cflags) and Node 20 runtime
+1. `index.js` - Core logic: clone repo → check cache → build if needed → install binaries → export env vars, set outputs
+2. `action.yml` - Action metadata defining inputs (repository, reference, cflags, submodules), outputs (cache-hit, sha), and Node 24 runtime
 3. `dist/index.js` - Bundled production file (auto-generated, committed to git)
 
 **Key implementation details:**
 - Binaries installed to `/usr/local/bin/` (micropython, mpy-cross)
-- Repository cloned to `/home/runner/micropython`
-- Cache key format: `install-micropython-2-${repository}-${reference}-${cflags}` (the `-2-` is a manual cache version bump; increment it to invalidate all caches)
-- Clone strategy: if a `reference` input is given, full clone then `git checkout <reference>`; if not, `git clone --depth 1` (shallow) of the default branch. The resolved `HEAD` SHA (via `git rev-parse`) is what goes into the cache key, not the raw reference input
-- On cache hit, the action returns early — no build, binaries restored from `/usr/local/bin/`. Builds use `make -j$(nproc)`
+- Repository cloned to `~/micropython` (`os.homedir()`, i.e. `/home/runner/micropython` on GitHub-hosted runners)
+- All git commands use the argument-array form of `exec.exec` with `--` separators (never string interpolation) to prevent argument injection via the `repository`/`reference` inputs
+- Cache key format: `install-micropython-2-${repository}-${sha}-${cflags}` (the `-2-` is a manual cache version bump; increment it to invalidate all caches). The resolved `HEAD` SHA (via `git rev-parse`) is what goes into the cache key, not the raw reference input
+- Clone strategy: if a `reference` input is given, `git ls-remote --tags` probes whether it's a tag — tags get `git clone --depth 1 --branch <reference>` (fast; tag ref present so `git describe` version strings stay exact), branches/SHAs get a full clone + checkout (so `git describe` has tag history). No reference → shallow clone of the default branch
+- `make submodules` (ports/unix) always runs when building from source (required), and also runs on cache hits unless the `submodules` input is false — this keeps `MPY_DIR` usable for natmod builds on warm runs. On cache hit the action then returns early — no build, binaries restored to `/usr/local/bin/`. Builds use `make -jN` with N from `os.cpus().length`
+- `cache.saveCache` failures are downgraded to warnings (a concurrent job may have already reserved the key)
+- `CFLAGS_EXTRA` (from the `cflags` input) is applied only to the Unix port build, not mpy-cross — mpy-cross's fixed config (e.g. `MICROPY_PY_SYS (0)`) fails to compile with many otherwise-valid feature flags
 
 **Dependencies:** `@actions/cache`, `@actions/core`, `@actions/exec`, `@actions/io`
 
 ## CI/CD Workflows
 
-- **test.yaml**: Runs on push/PR to main, tests with MicroPython v1.22.1 and latest
+- **test.yaml**: Runs on push/PR to main. Lints, tests with MicroPython v1.22.1 (tag/shallow), master (branch/full clone), and latest, then exercises the cache-restore path (`test-cache` job re-runs with the same pinned reference, asserts `cache-hit == 'true'`, and checks both `submodules` settings) and the `cflags` input (`-DMICROPY_MEM_STATS=1`, verified via `micropython.mem_total()`)
 - **build-and-pack.yml**: Auto-builds and commits dist/index.js on push to main/v* branches
-- **release-new-action-version.yml**: Updates major version tags on release
+- **release-new-action-version.yml**: Verifies the tagged dist/index.js matches a fresh build, then updates major version tags on release
 
 ## Development Workflow
 

@@ -15,12 +15,36 @@ permissions:
   contents: write
 
 jobs:
-  update_tag:
-    name: Update the major tag to include the ${{ github.event.inputs.TAG_NAME || github.event.release.tag_name }} changes
+  verify_dist:
+    name: Verify dist/index.js in ${{ github.event.inputs.TAG_NAME || github.event.release.tag_name }} is up to date
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ env.TAG_NAME }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Verify dist matches source
+        run: git diff --exit-code dist/
+
+  update_tag:
+    name: Update the major tag to include the ${{ github.event.inputs.TAG_NAME || github.event.release.tag_name }} changes
+    needs: verify_dist
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 

@@ -5,7 +5,8 @@
   "description": "A GitHub Action to clone, build, and install the Unix port of MicroPython",
   "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "eslint .",
+    "lint": "eslint .",
     "build": "ncc build index.js -o dist"
   },
   "repository": {
@@ -21,7 +22,7 @@
     "mpy-cross"
   ],
   "author": "Brian Pugh <bnp117@gmail.com>",
-  "license": "Apache 2.0",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/BrianPugh/install-micropython/issues"
   },
@@ -33,6 +34,8 @@
     "@actions/io": "^3.0.2"
   },
   "devDependencies": {
-    "@vercel/ncc": "^0.44.1"
+    "@eslint/js": "^9.0.0",
+    "@vercel/ncc": "^0.44.1",
+    "eslint": "^9.0.0"
   }
 }

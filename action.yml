@@ -15,6 +15,15 @@ inputs:
   cflags:
     description: "Extra cflags to pass to micropython at compile-time."
     required: false
+  submodules:
+    description: "Initialize MicroPython submodules so MPY_DIR is fully usable (e.g. natmod builds), even on cache hits. Set to false for faster cached runs when only the binaries are needed. Submodules are always initialized when building from source."
+    required: false
+    default: "true"
+outputs:
+  cache-hit:
+    description: "Whether the binaries were restored from cache ('true'/'false')."
+  sha:
+    description: "The resolved MicroPython commit SHA that was installed."
 runs:
-  using: "node20"
+  using: "node24"
   main: "dist/index.js"
