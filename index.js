@@ -8,7 +8,7 @@ import path from 'path';
 async function run() {
   // Get the repository URL and reference
   const repository = core.getInput('repository');
-  let reference = core.getInput('reference');
+  const reference = core.getInput('reference');
   const cflags = core.getInput('cflags');
 
   const mpy_dir = path.join(os.homedir(), 'micropython');
@@ -25,17 +25,19 @@ async function run() {
     await exec.exec('git', ['clone', '--depth', '1', '--', repository, mpy_dir]);
   }
 
-  const logResult = await exec.getExecOutput('git', ['rev-parse', 'HEAD'], {cwd: mpy_dir});
-  reference = logResult.stdout.trim();
+  const logResult = await exec.getExecOutput('git', ['rev-parse', 'HEAD'], { cwd: mpy_dir });
+  const sha = logResult.stdout.trim();
+  core.setOutput('sha', sha);
 
-  const cacheKey = `install-micropython-2-${repository}-${reference}-${cflags}`;
+  const cacheKey = `install-micropython-2-${repository}-${sha}-${cflags}`;
 
   const cachePaths = [
     `${mpy_dir}/mpy-cross/build/mpy-cross`,
     '/usr/local/bin/micropython',
     '/usr/local/bin/mpy-cross',
   ]
-  const cacheHit = await cache.restoreCache(cachePaths.slice(), cacheKey);
+  const cacheHit = Boolean(await cache.restoreCache(cachePaths.slice(), cacheKey));
+  core.setOutput('cache-hit', cacheHit);
 
   if (cacheHit) {
     return;

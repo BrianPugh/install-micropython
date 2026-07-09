@@ -59,3 +59,18 @@ This can be used to enable/disable certain micropython features.
 with:
   cflags: '-DMICROPY_PY_RE_MATCH_GROUPS=1'
 ```
+
+## Outputs
+
+#### cache-hit
+`'true'` if the binaries were restored from cache, `'false'` if they were built from source.
+
+#### sha
+The resolved MicroPython commit SHA that was installed.
+
+```yaml
+steps:
+  - uses: BrianPugh/install-micropython@v2
+    id: install
+  - run: echo "Installed micropython ${{ steps.install.outputs.sha }} (cache-hit=${{ steps.install.outputs.cache-hit }})"
+```

@@ -42063,10 +42063,10 @@ function getBooleanInput(name, options) {
 function setOutput(name, value) {
     const filePath = process.env['GITHUB_OUTPUT'] || '';
     if (filePath) {
-        return issueFileCommand('OUTPUT', prepareKeyValueMessage(name, value));
+        return file_command_issueFileCommand('OUTPUT', file_command_prepareKeyValueMessage(name, value));
     }
-    process.stdout.write(os.EOL);
-    issueCommand('set-output', { name }, toCommandValue(value));
+    process.stdout.write(external_os_.EOL);
+    command_issueCommand('set-output', { name }, utils_toCommandValue(value));
 }
 /**
  * Enables or disables the echoing of commands into stdout for the rest of the step.
@@ -89148,7 +89148,7 @@ function saveCacheV2(paths_1, key_1, options_1) {
 async function run() {
   // Get the repository URL and reference
   const repository = getInput('repository');
-  let reference = getInput('reference');
+  const reference = getInput('reference');
   const cflags = getInput('cflags');
 
   const mpy_dir = external_path_.join(external_os_.homedir(), 'micropython');
@@ -89165,17 +89165,19 @@ async function run() {
     await exec_exec('git', ['clone', '--depth', '1', '--', repository, mpy_dir]);
   }
 
-  const logResult = await getExecOutput('git', ['rev-parse', 'HEAD'], {cwd: mpy_dir});
-  reference = logResult.stdout.trim();
+  const logResult = await getExecOutput('git', ['rev-parse', 'HEAD'], { cwd: mpy_dir });
+  const sha = logResult.stdout.trim();
+  setOutput('sha', sha);
 
-  const cacheKey = `install-micropython-2-${repository}-${reference}-${cflags}`;
+  const cacheKey = `install-micropython-2-${repository}-${sha}-${cflags}`;
 
   const cachePaths = [
     `${mpy_dir}/mpy-cross/build/mpy-cross`,
     '/usr/local/bin/micropython',
     '/usr/local/bin/mpy-cross',
   ]
-  const cacheHit = await restoreCache(cachePaths.slice(), cacheKey);
+  const cacheHit = Boolean(await restoreCache(cachePaths.slice(), cacheKey));
+  setOutput('cache-hit', cacheHit);
 
   if (cacheHit) {
     return;
