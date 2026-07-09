@@ -10,6 +10,7 @@ async function run() {
   const repository = core.getInput('repository');
   const reference = core.getInput('reference');
   const cflags = core.getInput('cflags');
+  const submodules = core.getBooleanInput('submodules');
 
   const mpy_dir = path.join(os.homedir(), 'micropython');
   core.exportVariable('MPY_DIR', mpy_dir);
@@ -54,8 +55,15 @@ async function run() {
   core.setOutput('cache-hit', cacheHit);
 
   if (cacheHit) {
+    if (submodules) {
+      // Initialize submodules even on a cache hit so MPY_DIR is usable (e.g. natmod builds)
+      await exec.exec('make', ['submodules'], { cwd: `${mpy_dir}/ports/unix` });
+    }
     return;
   }
+
+  // Building the Unix port requires submodules regardless of the `submodules` input
+  await exec.exec('make', ['submodules'], { cwd: `${mpy_dir}/ports/unix` });
 
   const jobs = os.cpus().length;
 
@@ -63,7 +71,6 @@ async function run() {
   await exec.exec('make', [`-j${jobs}`], { cwd: `${mpy_dir}/mpy-cross` });
 
   // Build Unix Port
-  await exec.exec('make', ['submodules'], { cwd: `${mpy_dir}/ports/unix` });
   await exec.exec('make', [`-j${jobs}`], { cwd: `${mpy_dir}/ports/unix` });
 
   // Add the built binaries to the PATH

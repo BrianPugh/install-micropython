@@ -89150,6 +89150,7 @@ async function run() {
   const repository = getInput('repository');
   const reference = getInput('reference');
   const cflags = getInput('cflags');
+  const submodules = getBooleanInput('submodules');
 
   const mpy_dir = external_path_.join(external_os_.homedir(), 'micropython');
   exportVariable('MPY_DIR', mpy_dir);
@@ -89194,8 +89195,15 @@ async function run() {
   setOutput('cache-hit', cacheHit);
 
   if (cacheHit) {
+    if (submodules) {
+      // Initialize submodules even on a cache hit so MPY_DIR is usable (e.g. natmod builds)
+      await exec_exec('make', ['submodules'], { cwd: `${mpy_dir}/ports/unix` });
+    }
     return;
   }
+
+  // Building the Unix port requires submodules regardless of the `submodules` input
+  await exec_exec('make', ['submodules'], { cwd: `${mpy_dir}/ports/unix` });
 
   const jobs = external_os_.cpus().length;
 
@@ -89203,7 +89211,6 @@ async function run() {
   await exec_exec('make', [`-j${jobs}`], { cwd: `${mpy_dir}/mpy-cross` });
 
   // Build Unix Port
-  await exec_exec('make', ['submodules'], { cwd: `${mpy_dir}/ports/unix` });
   await exec_exec('make', [`-j${jobs}`], { cwd: `${mpy_dir}/ports/unix` });
 
   // Add the built binaries to the PATH
