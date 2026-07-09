@@ -11,7 +11,7 @@ This is a GitHub Action that builds and installs the MicroPython Unix port for C
 ```bash
 npm ci           # Install dependencies
 npm run build    # Bundle index.js with dependencies to dist/index.js using @vercel/ncc
-npm test         # Placeholder (no tests implemented)
+npm test         # Run eslint (also available as npm run lint)
 ```
 
 ## Architecture
