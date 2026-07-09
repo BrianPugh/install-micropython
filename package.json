@@ -1,6 +1,6 @@
 {
   "name": "build-and-install-micropython-unix-port",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "type": "module",
   "description": "A GitHub Action to clone, build, and install the Unix port of MicroPython",
   "main": "dist/index.js",

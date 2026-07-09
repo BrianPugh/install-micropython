@@ -20,7 +20,7 @@ Simply add the following step to your workflow:
 ```yaml
 steps:
   - name: Install MicroPython
-    uses: BrianPugh/install-micropython@v2
+    uses: BrianPugh/install-micropython@v3
 ```
 
 ## Configuration
@@ -29,7 +29,7 @@ For example:
 
 ```yaml
 steps:
-  - uses: BrianPugh/install-micropython@v2
+  - uses: BrianPugh/install-micropython@v3
     with:
       reference: v1.20.0
 ```
@@ -85,7 +85,7 @@ The resolved MicroPython commit SHA that was installed.
 
 ```yaml
 steps:
-  - uses: BrianPugh/install-micropython@v2
+  - uses: BrianPugh/install-micropython@v3
     id: install
   - run: echo "Installed micropython ${{ steps.install.outputs.sha }} (cache-hit=${{ steps.install.outputs.cache-hit }})"
 ```
