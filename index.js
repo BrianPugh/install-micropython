@@ -2,6 +2,8 @@ import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as io from '@actions/io';
+import os from 'os';
+import path from 'path';
 
 async function run() {
   // Get the repository URL and reference
@@ -9,7 +11,7 @@ async function run() {
   let reference = core.getInput('reference');
   const cflags = core.getInput('cflags');
 
-  const mpy_dir = '/home/runner/micropython'
+  const mpy_dir = path.join(os.homedir(), 'micropython');
   core.exportVariable('MPY_DIR', mpy_dir);
   core.exportVariable('CFLAGS_EXTRA', cflags);
 
@@ -39,12 +41,14 @@ async function run() {
     return;
   }
 
+  const jobs = os.cpus().length;
+
   // Build mpy-cross
-  await exec.exec('bash', ['-c', 'make -j$(nproc)'], {cwd: `${mpy_dir}/mpy-cross`});
+  await exec.exec('make', [`-j${jobs}`], { cwd: `${mpy_dir}/mpy-cross` });
 
   // Build Unix Port
-  await exec.exec('make submodules', [], {cwd: `${mpy_dir}/ports/unix`});
-  await exec.exec('bash', ['-c', 'make -j$(nproc)'], {cwd: `${mpy_dir}/ports/unix`});
+  await exec.exec('make', ['submodules'], { cwd: `${mpy_dir}/ports/unix` });
+  await exec.exec('make', [`-j${jobs}`], { cwd: `${mpy_dir}/ports/unix` });
 
   // Add the built binaries to the PATH
   await io.cp(`${mpy_dir}/mpy-cross/build/mpy-cross`, '/usr/local/bin/mpy-cross');

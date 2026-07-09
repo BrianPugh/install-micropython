@@ -89143,13 +89143,15 @@ function saveCacheV2(paths_1, key_1, options_1) {
 
 
 
+
+
 async function run() {
   // Get the repository URL and reference
   const repository = getInput('repository');
   let reference = getInput('reference');
   const cflags = getInput('cflags');
 
-  const mpy_dir = '/home/runner/micropython'
+  const mpy_dir = external_path_.join(external_os_.homedir(), 'micropython');
   exportVariable('MPY_DIR', mpy_dir);
   exportVariable('CFLAGS_EXTRA', cflags);
 
@@ -89179,12 +89181,14 @@ async function run() {
     return;
   }
 
+  const jobs = external_os_.cpus().length;
+
   // Build mpy-cross
-  await exec_exec('bash', ['-c', 'make -j$(nproc)'], {cwd: `${mpy_dir}/mpy-cross`});
+  await exec_exec('make', [`-j${jobs}`], { cwd: `${mpy_dir}/mpy-cross` });
 
   // Build Unix Port
-  await exec_exec('make submodules', [], {cwd: `${mpy_dir}/ports/unix`});
-  await exec_exec('bash', ['-c', 'make -j$(nproc)'], {cwd: `${mpy_dir}/ports/unix`});
+  await exec_exec('make', ['submodules'], { cwd: `${mpy_dir}/ports/unix` });
+  await exec_exec('make', [`-j${jobs}`], { cwd: `${mpy_dir}/ports/unix` });
 
   // Add the built binaries to the PATH
   await cp(`${mpy_dir}/mpy-cross/build/mpy-cross`, '/usr/local/bin/mpy-cross');
