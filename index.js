@@ -16,11 +16,11 @@ async function run() {
   // Shallow clone the repository to get the latest commit hash or checkout the provided reference
   if (reference) {
     // Clone the repository without depth restriction and checkout the provided reference
-    await exec.exec(`git clone ${repository} ${mpy_dir}`);
-    await exec.exec(`git checkout ${reference}`, [], { cwd: mpy_dir });
+    await exec.exec('git', ['clone', '--', repository, mpy_dir]);
+    await exec.exec('git', ['-c', 'advice.detachedHead=false', 'checkout', reference], { cwd: mpy_dir });
   } else {
     // Shallow clone the repository to get the latest commit hash
-    await exec.exec(`git clone --depth 1 ${repository} ${mpy_dir}`);
+    await exec.exec('git', ['clone', '--depth', '1', '--', repository, mpy_dir]);
   }
 
   const logResult = await exec.getExecOutput('git', ['rev-parse', 'HEAD'], {cwd: mpy_dir});
