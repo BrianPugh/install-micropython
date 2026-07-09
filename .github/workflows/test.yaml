@@ -128,9 +128,10 @@ jobs:
         uses: ./
         with:
           reference: "v1.22.1"
-          # MICROPY_MEM_STATS requires MICROPY_MALLOC_USES_ALLOCATED_SIZE (py/malloc.c)
-          cflags: "-DMICROPY_MEM_STATS=1 -DMICROPY_MALLOC_USES_ALLOCATED_SIZE=1"
+          # #ifndef-guarded everywhere and off by default on the unix standard
+          # variant, so it can't collide with port config and is observable
+          cflags: "-DMICROPY_PY_SYS_TRACEBACKLIMIT=1"
 
       - name: Verify cflags were applied
-        # micropython.mem_total() only exists when built with MICROPY_MEM_STATS
-        run: micropython -c "import micropython; print(micropython.mem_total())"
+        # sys.tracebacklimit is only settable when built with MICROPY_PY_SYS_TRACEBACKLIMIT
+        run: micropython -c "import sys; sys.tracebacklimit = 1; print('cflags applied')"
