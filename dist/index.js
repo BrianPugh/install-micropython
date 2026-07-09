@@ -89155,13 +89155,27 @@ async function run() {
   exportVariable('MPY_DIR', mpy_dir);
   exportVariable('CFLAGS_EXTRA', cflags);
 
-  // Shallow clone the repository to get the latest commit hash or checkout the provided reference
   if (reference) {
-    // Clone the repository without depth restriction and checkout the provided reference
-    await exec_exec('git', ['clone', '--', repository, mpy_dir]);
-    await exec_exec('git', ['-c', 'advice.detachedHead=false', 'checkout', reference], { cwd: mpy_dir });
+    let isTag = false;
+    try {
+      const lsRemote = await getExecOutput('git', ['ls-remote', '--tags', '--', repository, reference]);
+      isTag = lsRemote.stdout.trim() !== '';
+    } catch {
+      // Probing failed (e.g. transient network error); fall through to the full-clone path
+    }
+
+    if (isTag) {
+      // Tags can be cloned shallowly; the tag ref comes along, so the build's
+      // `git describe` version string is still exact
+      await exec_exec('git', ['clone', '--depth', '1', '--branch', reference, '--', repository, mpy_dir]);
+    } else {
+      // Branches and bare commit SHAs get a full clone so `git describe` has
+      // the tag history it needs for a correct version string
+      await exec_exec('git', ['clone', '--', repository, mpy_dir]);
+      await exec_exec('git', ['-c', 'advice.detachedHead=false', 'checkout', reference], { cwd: mpy_dir });
+    }
   } else {
-    // Shallow clone the repository to get the latest commit hash
+    // Shallow clone the default branch
     await exec_exec('git', ['clone', '--depth', '1', '--', repository, mpy_dir]);
   }
 

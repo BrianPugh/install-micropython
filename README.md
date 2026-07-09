@@ -45,6 +45,7 @@ with:
 
 #### reference
 A git reference (tag, commit, or branch) of the micropython repository to use.
+Tags are fetched with a fast shallow clone; branches and commit SHAs use a full clone so the built interpreter still reports an accurate `git describe`-based version string.
 
 ```yaml
 with:
