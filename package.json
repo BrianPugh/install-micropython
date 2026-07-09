@@ -21,7 +21,7 @@
     "mpy-cross"
   ],
   "author": "Brian Pugh <bnp117@gmail.com>",
-  "license": "Apache 2.0",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/BrianPugh/install-micropython/issues"
   },
