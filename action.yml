@@ -25,5 +25,5 @@ outputs:
   sha:
     description: "The resolved MicroPython commit SHA that was installed."
 runs:
-  using: "node20"
+  using: "node24"
   main: "dist/index.js"
