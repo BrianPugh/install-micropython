@@ -50,8 +50,13 @@ async function run() {
   await io.cp(`${mpy_dir}/mpy-cross/build/mpy-cross`, '/usr/local/bin/mpy-cross');
   await io.cp(`${mpy_dir}/ports/unix/build-standard/micropython`, '/usr/local/bin/micropython');
 
-  // Save the cache
-  await cache.saveCache(cachePaths.slice(), cacheKey);
+  // Save the cache; another concurrent job may have already reserved this key,
+  // which must not fail the build
+  try {
+    await cache.saveCache(cachePaths.slice(), cacheKey);
+  } catch (error) {
+    core.warning(`Failed to save cache: ${error.message}`);
+  }
 }
 
 run().catch(error => core.setFailed(error.message));
