@@ -7,9 +7,11 @@ This action provides the following functionality for GitHub Actions users:
 * Builds and installs the following executables:
     * `micropython` - The micropython runtime. Can be used to run unit tests in conjunction with libraries such as micropython's [`unittest`](https://github.com/micropython/micropython-lib/tree/master/python-stdlib/unittest).
     * `mpy-cross` - The micropython cross-compiler. Used to cross-compile precompiled bytecode for specific microcontroller architectures.
-* Provides a clone of the micropython repository and sets the environment variable `MPY_DIR` to it's path.
-    * Can be used as for artifact building, like [using native machine code in mpy files](https://docs.micropython.org/en/latest/develop/natmod.html#natmod).
+* Provides a clone of the micropython repository and sets the environment variable `MPY_DIR` to its path.
+    * Can be used for artifact building, like [using native machine code in mpy files](https://docs.micropython.org/en/latest/develop/natmod.html#natmod).
 * Builds are automatically cached, speeding up subsequent runs.
+
+This action only supports Linux runners.
 
 ## Basic Usage
 Simply add the following step to your workflow:
