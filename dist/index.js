@@ -90766,6 +90766,17 @@ function saveCacheV2(paths_1, key_1, options_1) {
 
 
 
+// Warning flags passed to every MicroPython build so older releases still
+// compile on newer GCC (MicroPython builds with -Werror). They only silence
+// diagnostics, so the binaries are unchanged and the flags stay out of the cache
+// key. They must use the plain -Wno-<warning> form: GCC silently ignores unknown
+// -Wno-<warning> options, but errors on an unknown -Wno-error=<warning>.
+const COMPAT_CFLAGS = [
+  // GCC 15 flags the "r0\0"-style initializers in py/emitinlinethumb.c of
+  // MicroPython <= v1.25.0 (fixed upstream in v1.26.0)
+  '-Wno-unterminated-string-initialization',
+].join(' ');
+
 async function run() {
   // Get the repository URL and reference
   const repository = getInput('repository');
@@ -90832,11 +90843,14 @@ async function run() {
   // withheld here and only applied to the Unix port build below
   await exec_exec('make', [`-j${jobs}`], {
     cwd: `${mpy_dir}/mpy-cross`,
-    env: { ...process.env, CFLAGS_EXTRA: '' },
+    env: { ...process.env, CFLAGS_EXTRA: COMPAT_CFLAGS },
   });
 
-  // Build Unix Port
-  await exec_exec('make', [`-j${jobs}`], { cwd: `${mpy_dir}/ports/unix` });
+  // Build Unix Port. User cflags come last so they can override the compat flags
+  await exec_exec('make', [`-j${jobs}`], {
+    cwd: `${mpy_dir}/ports/unix`,
+    env: { ...process.env, CFLAGS_EXTRA: [COMPAT_CFLAGS, cflags].filter(Boolean).join(' ') },
+  });
 
   // Add the built binaries to the PATH
   await cp(`${mpy_dir}/mpy-cross/build/mpy-cross`, '/usr/local/bin/mpy-cross');

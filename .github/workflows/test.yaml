@@ -117,6 +117,46 @@ jobs:
       - name: Verify Micropython Installation
         run: micropython tools/print_version.py
 
+  test-old-reference-new-gcc:
+    # MicroPython <= v1.25.0 fails to build on GCC 15 (-Werror plus the new
+    # -Wunterminated-string-initialization) unless the action relaxes it.
+    runs-on: ubuntu-26.04
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v5
+
+      - name: Verify GCC is new enough to exercise the regression
+        run: |
+          gcc --version
+          major=$(gcc -dumpversion | cut -d. -f1)
+          if [ "$major" -lt 15 ]; then
+            echo "Expected GCC >= 15, got $major."
+            exit 1
+          fi
+
+      - name: Build and Install MicroPython Unix Port
+        id: install
+        uses: ./
+        with:
+          reference: "v1.22.0"
+          # A per-run define gives a unique cache key, so this always builds
+          # from source instead of restoring a previous run's binaries
+          cflags: "-DINSTALL_MICROPYTHON_CI_RUN=${{ github.run_id }}${{ github.run_attempt }}"
+
+      - name: Verify the build ran from source
+        run: |
+          if [ "${{ steps.install.outputs.cache-hit }}" != "false" ]; then
+            echo "Expected a fresh build, got cache-hit '${{ steps.install.outputs.cache-hit }}'."
+            exit 1
+          fi
+
+      - name: Verify mpy-cross Installation
+        run: mpy-cross --version
+
+      - name: Verify Micropython Installation
+        run: micropython tools/print_version.py
+
   test-cflags:
     runs-on: ubuntu-latest
 

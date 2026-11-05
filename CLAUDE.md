@@ -31,12 +31,13 @@ npm test         # Run eslint (also available as npm run lint)
 - `make submodules` (ports/unix) always runs when building from source (required), and also runs on cache hits unless the `submodules` input is false — this keeps `MPY_DIR` usable for natmod builds on warm runs. On cache hit the action then returns early — no build, binaries restored to `/usr/local/bin/`. Builds use `make -jN` with N from `os.cpus().length`
 - `cache.saveCache` failures are downgraded to warnings (a concurrent job may have already reserved the key)
 - `CFLAGS_EXTRA` (from the `cflags` input) is applied only to the Unix port build, not mpy-cross — mpy-cross's fixed config (e.g. `MICROPY_PY_SYS (0)`) fails to compile with many otherwise-valid feature flags
+- `COMPAT_CFLAGS` (e.g. `-Wno-unterminated-string-initialization`) is passed via `CFLAGS_EXTRA` to both the mpy-cross and Unix port builds, ahead of the user's `cflags`, so older MicroPython releases build under `-Werror` on newer GCC. Only use plain `-Wno-<warning>` flags here: GCC silently ignores unknown ones, but an unknown `-Wno-error=<warning>` is a hard error on older GCC. They are left out of the cache key (they don't change the binaries). The exported `CFLAGS_EXTRA` stays the user's `cflags` only
 
 **Dependencies:** `@actions/cache`, `@actions/core`, `@actions/exec`, `@actions/io`
 
 ## CI/CD Workflows
 
-- **test.yaml**: Runs on push/PR to main. Lints, tests with MicroPython v1.22.1 (tag/shallow), master (branch/full clone), and latest, then exercises the cache-restore path (`test-cache` job re-runs with the same pinned reference, asserts `cache-hit == 'true'`, and checks both `submodules` settings) and the `cflags` input (`-DMICROPY_MEM_STATS=1`, verified via `micropython.mem_total()`)
+- **test.yaml**: Runs on push/PR to main. Lints, tests with MicroPython v1.22.1 (tag/shallow), master (branch/full clone), and latest, then exercises the cache-restore path (`test-cache` job re-runs with the same pinned reference, asserts `cache-hit == 'true'`, and checks both `submodules` settings) and the `cflags` input (`-DMICROPY_PY_SYS_TRACEBACKLIMIT=1`, verified by setting `sys.tracebacklimit`). `test-old-reference-new-gcc` builds v1.22.0 from source on `ubuntu-26.04` (asserts GCC >= 15; a per-run `cflags` define forces a cache miss) to guard `COMPAT_CFLAGS`
 - **build-and-pack.yml**: Auto-builds and commits dist/index.js on push to main/v* branches
 - **release-new-action-version.yml**: Verifies the tagged dist/index.js matches a fresh build, then updates major version tags on release
 

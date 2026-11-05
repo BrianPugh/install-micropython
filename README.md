@@ -58,6 +58,7 @@ When compiling the `micropython` Unix port binary, this value gets passed along 
 This can be used to enable/disable certain micropython features.
 It is intentionally not applied to the `mpy-cross` build, whose fixed feature configuration is incompatible with many otherwise-valid feature flags.
 Note that `CFLAGS_EXTRA` remains exported for all subsequent steps of the job.
+The action also passes its own warning-suppression flags (ahead of `cflags`, so yours take precedence) to both builds, so older MicroPython releases still compile on newer GCC versions.
 
 ```yaml
 with:
