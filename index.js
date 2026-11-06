@@ -55,7 +55,13 @@ async function run() {
   const sha = logResult.stdout.trim();
   core.setOutput('sha', sha);
 
-  const cacheKey = `install-micropython-2-${repository}-${sha}-${cflags}`;
+  // The binaries link against the runner's glibc, so a build from a newer image
+  // can't run on an older one. Key on the runner environment so e.g.
+  // ubuntu-latest and ubuntu-24.04 jobs never share a cache entry. ImageOS is
+  // set on GitHub-hosted runners; the glibc version covers self-hosted ones.
+  const glibc = process.report.getReport().header.glibcVersionRuntime ?? 'noglibc';
+  const runnerEnv = `${process.env.ImageOS ?? 'unknown'}-${os.arch()}-glibc${glibc}`;
+  const cacheKey = `install-micropython-3-${runnerEnv}-${repository}-${sha}-${cflags}`;
 
   const cachePaths = [
     `${mpy_dir}/mpy-cross/build/mpy-cross`,
