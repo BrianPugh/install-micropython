@@ -157,6 +157,38 @@ jobs:
       - name: Verify Micropython Installation
         run: micropython tools/print_version.py
 
+  test-cache-other-image:
+    # Binaries cached on a newer image (ubuntu-26.04) must not be restored on an
+    # older one: they need the newer glibc and fail with "GLIBC_x.y not found".
+    # Same reference and cflags as test-old-reference-new-gcc, so only the
+    # runner environment differs from the key that job just saved.
+    needs: test-old-reference-new-gcc
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v5
+
+      - name: Build and Install MicroPython Unix Port
+        id: install
+        uses: ./
+        with:
+          reference: "v1.22.0"
+          cflags: "-DINSTALL_MICROPYTHON_CI_RUN=${{ github.run_id }}${{ github.run_attempt }}"
+
+      - name: Verify the other image's cache was not used
+        run: |
+          if [ "${{ steps.install.outputs.cache-hit }}" != "false" ]; then
+            echo "Expected a fresh build, got cache-hit '${{ steps.install.outputs.cache-hit }}'."
+            exit 1
+          fi
+
+      - name: Verify mpy-cross Installation
+        run: mpy-cross --version
+
+      - name: Verify Micropython Installation
+        run: micropython tools/print_version.py
+
   test-cflags:
     runs-on: ubuntu-latest
 
